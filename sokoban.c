@@ -40,7 +40,6 @@ int main(void)
       }
 
       print_map(map_file);
-      printf("(Command)\n");  //맵파일을 출력한 뒤 값을 입력받기 위해 개행
 
       while(1)  //값을 입력받는다(e를 누르기 전까지)
       {
@@ -85,6 +84,7 @@ int getch(void){
 
 void print_map(char map_file[][map_width])
 {
+  system("clear");
   for(int i=0;i<map_height;i++) //맵 파일 출력하기
   {
     for(int j=0;j<map_width;j++)
@@ -92,6 +92,7 @@ void print_map(char map_file[][map_width])
       printf("%c", map_file[i][j]);
     }
   }
+  printf("\n (Command)");
 }
 
 int find_char_height(char map_file[][map_width])
@@ -120,7 +121,9 @@ int find_char_width(char map_file[][map_width])
 
 void move_down(char map_file[][map_width], int height, int width)
 {
-  if(map_file[height+2][width] == '0' && map_file[height+1][width] == '$')
+  if(map_file[height+1][width] == '$' && map_file[height+2][width] == '$');
+  else if(map_file[height+1][width] == '$' && map_file[height+2][width] == '#');
+  else if(map_file[height+2][width] == '0' && map_file[height+1][width] == '$')
   {
     char temp;
     map_file[height+2][width] = ' ';
@@ -151,7 +154,9 @@ void move_down(char map_file[][map_width], int height, int width)
 void move_top(char map_file[][map_width], int height, int width)
 {
   char temp;
-  if(map_file[height-2][width] == '0' && map_file[height-1][width] == '$')
+  if(map_file[height-2][width] == '$' && map_file[height-1][width] == '$');
+  else if(map_file[height-2][width] == '#' && map_file[height-1][width] == '$');
+  else if(map_file[height-2][width] == '0' && map_file[height-1][width] == '$')
   {
     char temp;
     map_file[height-2][width] = ' ';
@@ -181,7 +186,9 @@ void move_top(char map_file[][map_width], int height, int width)
 
 void move_right(char map_file[][map_width], int height, int width)
 {
-  if(map_file[height][width+2] == '0' && map_file[height][width+1] == '$')
+  if(map_file[height][width+1] == '$' && map_file[height][width+2] == '$');
+  else if(map_file[height][width+1] == '$' && map_file[height][width+2] == '#');
+  else if(map_file[height][width+2] == '0' && map_file[height][width+1] == '$')
   {
     char temp;
     map_file[height][width+2] = ' ';
@@ -211,7 +218,9 @@ void move_right(char map_file[][map_width], int height, int width)
 
 void move_left(char map_file[][map_width], int height, int width)
 {
-  if(map_file[height][width-2] == '0' && map_file[height][width-1] == '$')
+  if(map_file[height][width-1] == '$' && map_file[height][width-2] == '$');
+  else if(map_file[height][width-1] == '$' && map_file[height][width-2] == '#');
+  else if(map_file[height][width-2] == '0' && map_file[height][width-1] == '$')
   {
     char temp;
     map_file[height][width-2] = ' ';
