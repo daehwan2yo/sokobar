@@ -91,6 +91,7 @@ void print_map(char map_file[][map_width])
     {
       printf("%c", map_file[i][j]);
     }
+	  printf("\n");
   }
   printf("\n (Command)");
 }
