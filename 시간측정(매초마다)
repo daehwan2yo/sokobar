@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <windows.h>
+
+int s=0, m=0, h=0;
+
+void timer(int delay) 
+{ 
+int start = clock(); 
+int end = clock(); 
+while ((end - start) <= delay) 
+{  
+end = clock(); 
+}
+}
+
+int change(void)
+{
+timer(1000);
+s++;
+if(s==60)
+{
+s=0;
+m+=1;
+}    
+if(m==60)
+{  
+m=0;
+h+=1;
+}
+return;
+}
+
+int main(void)
+{    
+while(1)    
+{        
+printf("%d시%d분%d초\n", h, m, s); 
+change();        
+system("cls");    
+}    
+return 0;
+}
