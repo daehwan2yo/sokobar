@@ -36,6 +36,7 @@ void undo_scan(char map_file[map_height][map_width]);
 int undo_print(char map_file[map_height][map_width]);
 
       char undo[5][map_height][map_width]={0};
+      char map_replay[map_height][map_width];  //맵 리플레이를 저장하기 위한 변수
 
 int main(void)
 {
@@ -47,6 +48,7 @@ int main(void)
       int map_number=0;
       char map_file[map_height][map_width];  //맵 파일을 저장하기 위한 변수
       char map_file_all[map_max_number][map_height][map_width];
+
 
       name_length = scan_name(name);
 
@@ -80,12 +82,26 @@ int main(void)
           undo[3][i][j]= map_file[i][j];
           undo[4][i][j]= map_file[i][j];
         }
-        
+
       find_hole(map_file, hole_location);
       print_map(map_file);
 
+      int replay_i=0;
+      
       while(1)  //값을 입력받는다(e를 누르기 전까지)
       {
+
+
+        if (replay_i==0) {
+        for(int i=0; i<map_height; i++){
+          for(int j=0; j<map_width; j++){
+            map_replay[i][j] = map_file[i][j];
+              }
+            }
+          }
+
+        replay_i =1 ;
+
         insert = getch();  //값을 입력 받는다
         switch(insert)
         {
@@ -156,8 +172,22 @@ int main(void)
             else if(help_state==1)
               break;
 
-          case 't' :
-            display_top();
+            case 'r' :
+              if(help_state==0)
+              {
+               for(int i=0; i<map_height; i++){
+                 for(int j=0; j<map_width; j++){
+                   map_file[i][j] = map_replay[i][j];
+                     }
+                   }
+                print_map(map_file);
+                break;
+              }
+              else if(help_state==1)
+                break;
+
+            case 't' :
+              display_top();
         }
         if (check_clear(map_file, hole_location)==1)
         {
@@ -171,10 +201,12 @@ int main(void)
           }
           find_hole(map_file, hole_location);
           print_map(map_file);
+          replay_i=0;
         }
     }
       return 0;
-}
+  }
+
 
 int getch(void){
    int ch;
@@ -195,6 +227,7 @@ void print_map(char map_file[map_height][map_width])
 {
   system("clear");
   printf("");
+
   for(int i=0;i<map_height;i++) //맵 파일 출력하기
   {
     for(int j=0;j<map_width;j++)
@@ -202,6 +235,7 @@ void print_map(char map_file[map_height][map_width])
       printf("%c", map_file[i][j]);
     }
   }
+
   printf("\n(Command)\n");
 }
 
