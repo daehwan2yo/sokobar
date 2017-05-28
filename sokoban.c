@@ -8,7 +8,7 @@
 #define map_height  11
 #define map_width 24  //맵의 최대 가로 길이
 #define max_hole 7
-#define map_max_number 2// 맵의 최대 개수
+#define map_max_number 3// 맵의 최대 개수
 
 int scan_name(char name[name_max_length]);   //이름을 적기 위한 함수, 리턴값은 이름의 길이
 
@@ -131,19 +131,15 @@ int main(void)
         if (check_clear(map_file, hole_location)==1)
         {
           map_number++;
-          if(map_number==1)
+          for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
           {
-            for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
+            for(int j=0;j<map_width;j++)
             {
-              for(int j=0;j<map_width;j++)
-              {
-                map_file[i][j]=map_file_all[map_number][i][j];
-              }
+              map_file[i][j]=map_file_all[map_number][i][j];
             }
-            find_hole(map_file, hole_location);
-            print_map(map_file);
-            map_number--;
           }
+          find_hole(map_file, hole_location);
+          print_map(map_file);
         }
     }
       return 0;
@@ -167,6 +163,7 @@ int getch(void){
 void print_map(char map_file[map_height][map_width])
 {
   system("clear");
+  printf("");
   for(int i=0;i<map_height;i++) //맵 파일 출력하기
   {
     for(int j=0;j<map_width;j++)
@@ -174,7 +171,7 @@ void print_map(char map_file[map_height][map_width])
       printf("%c", map_file[i][j]);
     }
   }
-  printf("\n (Command)");
+  printf("\n(Command)\n");
 }
 
 int find_char_height(char map_file[][map_width])
