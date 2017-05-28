@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #define name_max_length 10  //이름의 최대 길이
 #define map_height  11
@@ -32,6 +33,12 @@ void display_top(void);
 
 int check_clear(char map_file[map_height][map_width], int hole_location[max_hole][2]);
 
+void undo_scan(char map_file[map_height][map_width]);
+int undo_print(char map_file[map_height][map_width]);
+
+      char undo[5][map_height][map_width]={0};
+      char map_replay[map_height][map_width];  //맵 리플레이를 저장하기 위한 변수
+
 int main(void)
 {
       FILE * map_load;  //맵 파일 불러오기 위한 파일 변수
@@ -42,6 +49,9 @@ int main(void)
       int map_number=0;
       char map_file[map_height][map_width];  //맵 파일을 저장하기 위한 변수
       char map_file_all[map_max_number][map_height][map_width];
+      time_t start,end,new,new_end;
+      double dif,dif_new;
+
       name_length = scan_name(name);
 
       map_load = fopen("map", "r");  //맵 파일 불러오기
@@ -56,6 +66,8 @@ int main(void)
         }
       }
 
+
+
       for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
       {
         for(int j=0;j<map_width;j++)
@@ -64,17 +76,40 @@ int main(void)
         }
       }
 
+      for (int i=0; i<map_height; i++)
+        for(int j=0; j<map_width; j++) {
+          undo[0][i][j]= map_file[i][j];
+          undo[1][i][j]= map_file[i][j];
+          undo[2][i][j]= map_file[i][j];
+          undo[3][i][j]= map_file[i][j];
+          undo[4][i][j]= map_file[i][j];
+        }
+
       find_hole(map_file, hole_location);
       print_map(map_file);
+      time(&start);
 
+      int replay_i=0;
+      
       while(1)  //값을 입력받는다(e를 누르기 전까지)
       {
+        if (replay_i==0) {
+        for(int i=0; i<map_height; i++){
+          for(int j=0; j<map_width; j++){
+            map_replay[i][j] = map_file[i][j];
+              }
+            }
+          }
+
+        replay_i =1 ;
+
         insert = getch();  //값을 입력 받는다
         switch(insert)
         {
           case 'j' :
           if(help_state==0)
           {
+            undo_scan(map_file);
             move_down(map_file, find_char_height(map_file), find_char_width(map_file));
             change_hole(map_file, hole_location);
             print_map(map_file);
@@ -85,6 +120,7 @@ int main(void)
           case 'k' :
           if(help_state==0)
           {
+            undo_scan(map_file);
             move_top(map_file, find_char_height(map_file), find_char_width(map_file));
             change_hole(map_file, hole_location);
             print_map(map_file);
@@ -95,6 +131,7 @@ int main(void)
           case 'l' :
           if(help_state==0)
           {
+            undo_scan(map_file);
             move_right(map_file, find_char_height(map_file), find_char_width(map_file));
             change_hole(map_file, hole_location);
             print_map(map_file);
@@ -105,6 +142,7 @@ int main(void)
           case 'h' :
           if(help_state==0)
           {
+            undo_scan(map_file);
             move_left(map_file, find_char_height(map_file), find_char_width(map_file));
             change_hole(map_file, hole_location);
             print_map(map_file);
@@ -125,9 +163,39 @@ int main(void)
               help_state++;
               break;
             }
-          case 't' :
-            display_top();
+
+            case 'u' :
+            if(help_state==0)
+            {
+              undo_print(map_file);
+              break;
+            }
+            else if(help_state==1)
+              break;
+
+            case 'r' :
+              if(help_state==0)
+              {
+               for(int i=0; i<map_height; i++){
+                 for(int j=0; j<map_width; j++){
+                   map_file[i][j] = map_replay[i][j];
+                     }
+                   }
+                print_map(map_file);
+                break;
+              }
+              else if(help_state==1)
+                break;
+            case 'n' :
+              time(&new);
+              dif_new=difftime(new_end,new);
+              printf("시간: %.2f", dif_new);
+              break;
+            case 't' :
+              display_top();
+              break;
         }
+
         if (check_clear(map_file, hole_location)==1)
         {
           map_number++;
@@ -140,10 +208,16 @@ int main(void)
           }
           find_hole(map_file, hole_location);
           print_map(map_file);
+          replay_i=0;
+          time(&end);
+          dif=difftime(end,start);
+          printf("시간: %.0f",dif);
+          time(&start);
         }
     }
       return 0;
-}
+  }
+
 
 int getch(void){
    int ch;
@@ -164,6 +238,7 @@ void print_map(char map_file[map_height][map_width])
 {
   system("clear");
   printf("");
+
   for(int i=0;i<map_height;i++) //맵 파일 출력하기
   {
     for(int j=0;j<map_width;j++)
@@ -171,6 +246,7 @@ void print_map(char map_file[map_height][map_width])
       printf("%c", map_file[i][j]);
     }
   }
+
   printf("\n(Command)\n");
 }
 
@@ -432,4 +508,38 @@ int check_clear(char map_file[map_height][map_width], int hole_location[max_hole
   {
     return 0;
   }
+}
+
+void undo_scan(char map_file[map_height][map_width])           //맵 파일을 5번 기억 하는 함수 (움직일때마다 사용 - 이 전 5번의 움직임을 저장)
+{
+for(int i=0; i<map_height; i++)
+for(int j=0; j<map_width; j++){
+ undo[4][i][j] =  undo[3][i][j];
+ undo[3][i][j] =  undo[2][i][j];
+ undo[2][i][j] =  undo[1][i][j];
+ undo[1][i][j] =  undo[0][i][j];
+ undo[0][i][j] = map_file[i][j];
+}
+
+}
+
+int undo_print(char map_file[][map_width])
+{
+int undo_num =0;
+
+ if (undo_num==5)
+    return 0;
+for(int i=0; i<map_height; i++)
+  for(int j=0; j<map_width; j++){
+  map_file[i][j] = undo[0][i][j];
+  undo[0][i][j] =  undo[1][i][j];
+  undo[1][i][j] =  undo[2][i][j];
+  undo[2][i][j] =  undo[3][i][j];
+  undo[3][i][j] =  undo[4][i][j];
+}
+  undo_num++;
+
+print_map(map_file);
+return 0;
+
 }
