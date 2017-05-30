@@ -8,9 +8,10 @@
 #define name_max_length 10  //이름의 최대 길이
 #define map_height  11
 #define map_width 24  //맵의 최대 가로 길이
-#define max_hole 7
+#define max_hole 8
 #define map_max_number 3// 맵의 최대 개수
 
+int map_number=0, hole_number=0;
 int scan_name(char name[name_max_length]);   //이름을 적기 위한 함수, 리턴값은 이름의 길이
 
 int getch(void); //엔터 없이 입력하게 하기 위한 함수_
@@ -39,6 +40,10 @@ int undo_print(char map_file[map_height][map_width]);
       char undo[5][map_height][map_width]={0};
       char map_replay[map_height][map_width];  //맵 리플레이를 저장하기 위한 변수
 
+void save_file_load(char map_file[map_height][map_width]);
+void save_file_save(char map_file[map_height][map_width], int);
+void check_map(char map_file_all[map_max_number][map_height][map_width]);
+
 int main(void)
 {
       FILE * map_load;  //맵 파일 불러오기 위한 파일 변수
@@ -46,13 +51,10 @@ int main(void)
       char insert;  //입력을 입력받는 변수
       int name_length, help_state=0;
       int hole_location[max_hole][2]={0};
-      int map_number=0;
       char map_file[map_height][map_width];  //맵 파일을 저장하기 위한 변수
       char map_file_all[map_max_number][map_height][map_width];
       time_t start,end,new,new_end;
       double dif,dif_new;
-
-      name_length = scan_name(name);
 
       map_load = fopen("map", "r");  //맵 파일 불러오기
       for(int k=0;k<map_max_number;k++)
@@ -66,7 +68,9 @@ int main(void)
         }
       }
 
+      check_map(map_file_all);
 
+      name_length = scan_name(name);
 
       for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
       {
@@ -90,7 +94,7 @@ int main(void)
       time(&start);
 
       int replay_i=0;
-      
+
       while(1)  //값을 입력받는다(e를 누르기 전까지)
       {
         if (replay_i==0) {
@@ -186,24 +190,47 @@ int main(void)
               }
               else if(help_state==1)
                 break;
+
             case 'n' :
               time(&new);
               dif_new=difftime(new_end,new);
               printf("시간: %.2f", dif_new);
               break;
+
             case 't' :
               display_top();
+              break;
+
+            case 's' :
+              save_file_save(map_file, map_number);
+              break;
+
+            case 'f' :
+              save_file_load(map_file);
               break;
         }
 
         if (check_clear(map_file, hole_location)==1)
         {
+          if(map_number==map_max_number-1)
+          {
+            system("clear");
+            printf("다 깸");
+            exit(-1);
+          }
           map_number++;
-          for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
+          for(int i=0;i<map_height;i++)
           {
             for(int j=0;j<map_width;j++)
             {
               map_file[i][j]=map_file_all[map_number][i][j];
+            }
+          }
+          for(int i=0;i<max_hole;i++)
+          {
+            for(int j=0;j<2;j++)
+            {
+              hole_location[i][j]=0;
             }
           }
           find_hole(map_file, hole_location);
@@ -435,6 +462,7 @@ int scan_name(char name[name_max_length])
 
 void find_hole(char map_file[map_height][map_width], int hole_location[max_hole][2])
 {
+  hole_number=0;
   int location_height = 0;
   for(int i=0;i<map_height;i++)
   {
@@ -445,6 +473,7 @@ void find_hole(char map_file[map_height][map_width], int hole_location[max_hole]
         hole_location[location_height][0] = i;
         hole_location[location_height][1] = j;
         location_height++;
+        hole_number++;
       }
     }
   }
@@ -493,14 +522,14 @@ void display_top()
 int check_clear(char map_file[map_height][map_width], int hole_location[max_hole][2])
 {
   int hole_clear=0;
-  for(int i=0;i<max_hole-1;i++)
+  for(int i=0;i<hole_location[i][0]!=0;i++)
   {
     if(map_file[hole_location[i][0]][hole_location[i][1]]=='$')
     {
       hole_clear++;
     }
   }
-  if(hole_clear==max_hole-1)
+  if(hole_clear==hole_number)
   {
     return 1;
   }
@@ -542,4 +571,60 @@ for(int i=0; i<map_height; i++)
 print_map(map_file);
 return 0;
 
+}
+
+void save_file_save(char map_file[map_height][map_width], int map_number)
+{
+  FILE *save_file;
+  save_file=fopen("sokoban", "w");
+  for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
+  {
+    for(int j=0;j<map_width;j++)
+    {
+        fprintf(save_file, "%c", map_file[i][j]);
+    }
+  }
+  fprintf(save_file, "%d", map_number);
+  fclose(save_file);
+}
+
+void save_file_load(char map_file[map_height][map_width])
+{
+  FILE *save_file;
+  save_file=fopen("sokoban", "r");
+  for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
+  {
+    for(int j=0;j<map_width;j++)
+    {
+        fscanf(save_file, "%c", &map_file[i][j]);
+    }
+  }
+  extern int map_number;
+  fscanf(save_file,"c", &map_number);
+  fclose(save_file);
+  print_map(map_file);
+}
+
+void check_map(char map_file_all[map_max_number][map_height][map_width])
+{
+  int hole_num_file=0, box_num_file=0;
+  for(int k=0;k<map_max_number;k++)
+  {
+    for(int i=0;i<map_height;i++)
+    {
+      for(int j=0;j<map_width;j++)
+      {
+          if(map_file_all[k][i][j]=='0')
+            hole_num_file++;
+          else if(map_file_all[k][i][j]=='$')
+            box_num_file++;
+      }
+    }
+  }
+  if(hole_num_file!=box_num_file)
+  {
+    printf("박스의 개수와 보관장소의 개수가 다릅니다\n");
+    printf("프로그램을 종료합니다.");
+    exit(-1);
+  }
 }
