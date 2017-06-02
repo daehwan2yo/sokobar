@@ -24,7 +24,7 @@ void move_top(char map_file[map_height][map_width], int, int);
 void move_left(char map_file[map_height][map_width], int, int);
 void move_right(char map_file[map_height][map_width], int, int);
 
-void print_map(char map_file[map_height][map_width]);//맵을 출력하는 함수
+void print_map(char map_file[map_height][map_width], char name[name_max_length]);//맵을 출력하는 함수
 
 void change_hole(char map_file[map_height][map_width], int hole_location[max_hole][2]); //맵의 0개수를 처리하는 함수
 void find_hole(char map_file[map_height][map_width], int hole_location[max_hole][2]);
@@ -46,17 +46,18 @@ void check_map(char map_file_all[map_max_number][map_height][map_width]);
 
 int main(void)
 {
-      FILE * map_load;  //맵 파일 불러오기 위한 파일 변수
+      FILE * map_load, *top;  //맵 파일 불러오기 위한 파일 변수
       char name[name_max_length]; //이름을 입력받는 함수
       char insert;  //입력을 입력받는 변수
       int name_length, help_state=0;
       int hole_location[max_hole][2]={0};
       char map_file[map_height][map_width];  //맵 파일을 저장하기 위한 변수
       char map_file_all[map_max_number][map_height][map_width];
-      time_t start,end,new,new_end;
-      double dif,dif_new;
+      int replay_i=0;
+      clock_t start, end;
+      long long result;
 
-      map_load = fopen("map", "r");  //맵 파일 불러오기
+      map_load = fopen("map.txt", "r");  //맵 파일 불러오기
       for(int k=0;k<map_max_number;k++)
       {
         for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
@@ -90,10 +91,9 @@ int main(void)
         }
 
       find_hole(map_file, hole_location);
-      print_map(map_file);
-      time(&start);
-
-      int replay_i=0;
+      print_map(map_file, name);
+      start=clock();
+      printf("%d", start);
 
       while(1)  //값을 입력받는다(e를 누르기 전까지)
       {
@@ -111,53 +111,57 @@ int main(void)
         switch(insert)
         {
           case 'j' :
-          if(help_state==0)
-          {
-            undo_scan(map_file);
-            move_down(map_file, find_char_height(map_file), find_char_width(map_file));
-            change_hole(map_file, hole_location);
-            print_map(map_file);
-            break;
-          }
-          else if(help_state==1)
-            break;
+            if(help_state==0)
+            {
+              undo_scan(map_file);
+              move_down(map_file, find_char_height(map_file), find_char_width(map_file));
+              change_hole(map_file, hole_location);
+              print_map(map_file, name);
+              break;
+            }
+            else if(help_state==1)
+              break;
+
           case 'k' :
-          if(help_state==0)
-          {
-            undo_scan(map_file);
-            move_top(map_file, find_char_height(map_file), find_char_width(map_file));
-            change_hole(map_file, hole_location);
-            print_map(map_file);
-            break;
-          }
-          else if(help_state==1)
-            break;
+            if(help_state==0)
+            {
+              undo_scan(map_file);
+              move_top(map_file, find_char_height(map_file), find_char_width(map_file));
+              change_hole(map_file, hole_location);
+              print_map(map_file, name);
+              break;
+            }
+            else if(help_state==1)
+              break;
+
           case 'l' :
-          if(help_state==0)
-          {
-            undo_scan(map_file);
-            move_right(map_file, find_char_height(map_file), find_char_width(map_file));
-            change_hole(map_file, hole_location);
-            print_map(map_file);
-            break;
-          }
-          else if(help_state==1)
-            break;
+            if(help_state==0)
+            {
+              undo_scan(map_file);
+              move_right(map_file, find_char_height(map_file), find_char_width(map_file));
+              change_hole(map_file, hole_location);
+              print_map(map_file, name);
+              break;
+            }
+            else if(help_state==1)
+              break;
+
           case 'h' :
-          if(help_state==0)
-          {
-            undo_scan(map_file);
-            move_left(map_file, find_char_height(map_file), find_char_width(map_file));
-            change_hole(map_file, hole_location);
-            print_map(map_file);
+            if(help_state==0)
+            {
+              undo_scan(map_file);
+              move_left(map_file, find_char_height(map_file), find_char_width(map_file));
+              change_hole(map_file, hole_location);
+              print_map(map_file, name);
+              break;
+            }
+            else if(help_state==1)
             break;
-          }
-          else if(help_state==1)
-            break;
+
           case 'd' :
             if(help_state==1)
             {
-              print_map(map_file);
+              print_map(map_file, name);
               help_state--;
               break;
             }
@@ -168,54 +172,70 @@ int main(void)
               break;
             }
 
-            case 'u' :
+          case 'u' :
             if(help_state==0)
             {
               undo_print(map_file);
+              print_map(map_file, name);
               break;
             }
             else if(help_state==1)
               break;
 
-            case 'r' :
-              if(help_state==0)
-              {
-               for(int i=0; i<map_height; i++){
-                 for(int j=0; j<map_width; j++){
-                   map_file[i][j] = map_replay[i][j];
-                     }
+          case 'r' :
+            if(help_state==0)
+            {
+             for(int i=0; i<map_height; i++){
+               for(int j=0; j<map_width; j++){
+                 map_file[i][j] = map_replay[i][j];
                    }
-                print_map(map_file);
-                break;
+                 }
+              print_map(map_file, name);
+              break;
+            }
+            else if(help_state==1)
+              break;
+
+          case 'n' :
+            start=clock();
+            for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
+            {
+              for(int j=0;j<map_width;j++)
+              {
+                map_file[i][j] = map_file_all[0][i][j];
               }
-              else if(help_state==1)
-                break;
+            }
+            find_hole(map_file, hole_location);
+            print_map(map_file, name);
+            map_number=0;
+            break;
 
-            case 'n' :
-              time(&new);
-              dif_new=difftime(new_end,new);
-              printf("시간: %.2f", dif_new);
-              break;
+          case 't' :
+            display_top();
+            break;
 
-            case 't' :
-              display_top();
-              break;
+          case 's' :
+            save_file_save(map_file, map_number);
+            break;
 
-            case 's' :
-              save_file_save(map_file, map_number);
-              break;
-
-            case 'f' :
-              save_file_load(map_file);
-              break;
+          case 'f' :
+            save_file_load(map_file);
+            print_map(map_file, name);
+            break;
         }
-
-        if (check_clear(map_file, hole_location)==1)
+        end=clock();
+        if (check_clear(map_file, hole_location)==1||insert=='c')
         {
+          result =end - start;
+          printf("\n%d\n", start);
+          printf("%d\n", end);
+          printf("시간: %ld",result);
           if(map_number==map_max_number-1)
           {
             system("clear");
-            printf("다 깸");
+            printf("\n   SEE YOU ");
+            printf("%s", name);
+            printf(". . . .");
             exit(-1);
           }
           map_number++;
@@ -234,12 +254,9 @@ int main(void)
             }
           }
           find_hole(map_file, hole_location);
-          print_map(map_file);
+          print_map(map_file, name);
           replay_i=0;
-          time(&end);
-          dif=difftime(end,start);
-          printf("시간: %.0f",dif);
-          time(&start);
+          start = clock()-end;
         }
     }
       return 0;
@@ -261,11 +278,11 @@ int getch(void){
    return ch;
 }
 
-void print_map(char map_file[map_height][map_width])
+void print_map(char map_file[map_height][map_width], char name[name_max_length])
 {
   system("clear");
-  printf("");
-
+  printf("\n      Hello ");
+  printf("%s\n\n", name);
   for(int i=0;i<map_height;i++) //맵 파일 출력하기
   {
     for(int j=0;j<map_width;j++)
@@ -568,7 +585,6 @@ for(int i=0; i<map_height; i++)
 }
   undo_num++;
 
-print_map(map_file);
 return 0;
 
 }
@@ -576,7 +592,7 @@ return 0;
 void save_file_save(char map_file[map_height][map_width], int map_number)
 {
   FILE *save_file;
-  save_file=fopen("sokoban", "w");
+  save_file=fopen("sokoban.txt", "w");
   for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
   {
     for(int j=0;j<map_width;j++)
@@ -591,7 +607,7 @@ void save_file_save(char map_file[map_height][map_width], int map_number)
 void save_file_load(char map_file[map_height][map_width])
 {
   FILE *save_file;
-  save_file=fopen("sokoban", "r");
+  save_file=fopen("sokoban.txt", "r");
   for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
   {
     for(int j=0;j<map_width;j++)
@@ -602,7 +618,6 @@ void save_file_load(char map_file[map_height][map_width])
   extern int map_number;
   fscanf(save_file,"c", &map_number);
   fclose(save_file);
-  print_map(map_file);
 }
 
 void check_map(char map_file_all[map_max_number][map_height][map_width])
