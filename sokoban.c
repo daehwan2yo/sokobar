@@ -44,7 +44,7 @@ void save_file_load(char map_file[map_height][map_width]);
 void save_file_save(char map_file[map_height][map_width], int);
 void check_map(char map_file_all[map_max_number][map_height][map_width]);
 
-void save_ranking(int ranking_file[map_max_number][3][16], int, char name[name_max_length], int);
+void save_ranking(int ranking_file[map_max_number][3][16], int, char name[name_max_length], int, int);
 
 int main(void)
 {
@@ -81,7 +81,10 @@ int main(void)
       {
         for(int j=0;j<3;j++)
         {
-          fscanf(ranking_load, "%s", &ranking_file[k][j]);
+          for(int i=0;i<10;i++)
+          {
+            fscanf(ranking_load, "%c", &ranking_file[k][j][i]);
+          }
           fscanf(ranking_load, "%c", &ranking_file[k][j][11]);
           fscanf(ranking_load, "%d", &ranking_file[k][j][12]);
           fscanf(ranking_load, "%c", &ranking_file[k][j][13]);
@@ -259,7 +262,7 @@ int main(void)
             printf(". . . .");
             exit(-1);
           }
-          save_ranking(ranking_file, dif, name, name_length);
+          save_ranking(ranking_file, dif, name, name_length, map_number);
           map_number++;
           for(int i=0;i<map_height;i++)
           {
@@ -666,15 +669,15 @@ void check_map(char map_file_all[map_max_number][map_height][map_width])
   }
 }
 
-void save_ranking(int ranking_file[map_max_number][3][16], int dif, char name[name_max_length], int name_length)
+void save_ranking(int ranking_file[map_max_number][3][16], int dif, char name[name_max_length], int name_length, int map_number)
 {
   FILE *ranking_load;
   ranking_load = fopen("ranking.txt", "w");
-  if(dif>ranking_file[map_number][0][12])
+  if(dif<ranking_file[map_number][2][12] || dif>ranking_file[map_number][1][12])
   {
     for(int i=0;i<name_length;i++)
     {
-      ranking_file[map_number][0][i]=name[i];
+      ranking_file[map_number][2][i]=name[i];
     }
     if(name_length<10)
     {
@@ -685,9 +688,9 @@ void save_ranking(int ranking_file[map_max_number][3][16], int dif, char name[na
         name_length++;
       }
     }
-    ranking_file[map_number][0][12]=dif;
+    ranking_file[map_number][2][12]=dif;
   }
-  else if(dif>ranking_file[map_number][1][12] || dif<ranking_file[map_number][0][12])
+  else if(dif<ranking_file[map_number][1][12] || dif>ranking_file[map_number][0][12])
   {
     for(int i=0;i<name_length;i++)
     {
@@ -704,22 +707,22 @@ void save_ranking(int ranking_file[map_max_number][3][16], int dif, char name[na
     }
     ranking_file[map_number][1][12]=dif;
   }
-  else if(dif>ranking_file[map_number][2][12] || dif<ranking_file[map_number][1][12])
+  else if(dif<ranking_file[map_number][0][12])
   {
     for(int i=0;i<name_length;i++)
     {
-      ranking_file[map_number][2][i]=name[i];
+      ranking_file[map_number][0][i]=name[i];
     }
     if(name_length<10)
     {
       int space = 10-name_length;
       for(;space>0;space--)
       {
-        ranking_file[map_number][0][name_length]=' ';
+        ranking_file[map_number][0][name_length]=32;
         name_length++;
       }
     }
-    ranking_file[map_number][2][12]=dif;
+    ranking_file[map_number][0][12]=dif;
   }
   for(int k=0;k<map_max_number;k++)
   {
