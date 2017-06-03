@@ -44,7 +44,7 @@ void save_file_load(char map_file[map_height][map_width]);
 void save_file_save(char map_file[map_height][map_width], int);
 void check_map(char map_file_all[map_max_number][map_height][map_width]);
 
-void save_ranking(char ranking_file[map_max_number][3][3], int);
+void save_ranking(int ranking_file[map_max_number][3][16], int, char name[name_max_length], int);
 
 int main(void)
 {
@@ -59,10 +59,10 @@ int main(void)
       time_t start, end;
       int dif;
       int result;
-      int ranking_file[map_max_number][3][2];
+      int ranking_file[map_max_number][3][16];
 
-      map_load = fopen("map.txt", "r");  //맵 파일 불러오기
-      ranking_load = fopen("ranking.txt", "r+");
+      ranking_load = fopen("ranking.txt", "r");
+      map_load = fopen("map.txt", "r");
       for(int k=0;k<map_max_number;k++)
       {
         for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
@@ -74,33 +74,30 @@ int main(void)
         }
       }
 
-      for(int k=0;k<map_max_number;k++)
-      {
-        for(int i=0;i<3;i++) //맵 파일을 map_file에 저장
-        {
-              fscanf(ranking_load, "%d", &ranking_file[k][i][0]);
-              fscanf(ranking_load, "%c", &ranking_file[k][i][1]);
-        }
-      }
-      for(int k=0;k<map_max_number;k++)
-      {
-        for(int i=0;i<3;i++) //맵 파일을 map_file에 저장
-        {
-              fprintf(ranking_load, "%d", 5);
-              fprintf(ranking_load, "%c", ranking_file[k][i][1]);
-        }
-      }
-      for(int k=0;k<map_max_number;k++)
-      {
-        for(int i=0;i<3;i++) //맵 파일을 map_file에 저장
-        {
-            printf("%d%c", ranking_file[k][i][0], ranking_file[k][i][1]);
-        }
-      }
-
+      name_length = scan_name(name);
       check_map(map_file_all);
 
-      name_length = scan_name(name);
+      for(int k=0;k<map_max_number;k++)
+      {
+        for(int j=0;j<3;j++)
+        {
+          fscanf(ranking_load, "%s", &ranking_file[k][j]);
+          fscanf(ranking_load, "%c", &ranking_file[k][j][11]);
+          fscanf(ranking_load, "%d", &ranking_file[k][j][12]);
+          fscanf(ranking_load, "%c", &ranking_file[k][j][13]);
+        }
+      }
+      fclose(ranking_load);
+      for(int k=0;k<map_max_number;k++)
+      {
+        for(int j=0;j<3;j++)
+        {
+          printf("%s", ranking_file[k][j]);
+          printf("%c", ranking_file[k][j][11]);
+          printf("%d", ranking_file[k][j][12]);
+          printf("%c", ranking_file[k][j][13]);
+        }
+      }
 
       for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
       {
@@ -120,7 +117,6 @@ int main(void)
         }
 
       find_hole(map_file, hole_location);
-      print_map(map_file, name);
       time(&start);
 
       while(1)  //값을 입력받는다(e를 누르기 전까지)
@@ -263,15 +259,7 @@ int main(void)
             printf(". . . .");
             exit(-1);
           }
-          ranking_file[map_number][1][0]=dif;
-          for(int k=0;k<map_max_number;k++)
-          {
-            for(int i=0;i<3;i++)  //맵 파일을 map_file에 저장
-            {
-                  fprintf(ranking_load, "%d", ranking_file[k][i][0]);
-                  fprintf(ranking_load, "%c", ranking_file[k][i][1]);
-            }
-          }
+          save_ranking(ranking_file, dif, name, name_length);
           map_number++;
           for(int i=0;i<map_height;i++)
           {
@@ -678,21 +666,73 @@ void check_map(char map_file_all[map_max_number][map_height][map_width])
   }
 }
 
-void save_ranking(char ranking_file[map_max_number][3][3], int dif)
+void save_ranking(int ranking_file[map_max_number][3][16], int dif, char name[name_max_length], int name_length)
 {
-  if(dif>ranking_file[map_number][1][1])
+  FILE *ranking_load;
+  ranking_load = fopen("ranking.txt", "w");
+  if(dif>ranking_file[map_number][0][12])
   {
-      ranking_file[map_number][1][1]=dif;
-      ranking_file[map_number][1][2]='\n';
+    for(int i=0;i<name_length;i++)
+    {
+      ranking_file[map_number][0][i]=name[i];
+    }
+    if(name_length<10)
+    {
+      int space = 10-name_length;
+      for(;space>0;space--)
+      {
+        ranking_file[map_number][0][name_length]=' ';
+        name_length++;
+      }
+    }
+    ranking_file[map_number][0][12]=dif;
   }
-  else if(dif>ranking_file[map_number][2][1] || dif<ranking_file[map_number][1][1])
+  else if(dif>ranking_file[map_number][1][12] || dif<ranking_file[map_number][0][12])
   {
-      ranking_file[map_number][2][1]=dif;
-      ranking_file[map_number][2][2]='\n';
+    for(int i=0;i<name_length;i++)
+    {
+      ranking_file[map_number][1][i]=name[i];
+    }
+    if(name_length<10)
+    {
+      int space = 10-name_length;
+      for(;space>0;space--)
+      {
+        ranking_file[map_number][0][name_length]=' ';
+        name_length++;
+      }
+    }
+    ranking_file[map_number][1][12]=dif;
   }
-  else if(dif>ranking_file[map_number][3][1] || dif<ranking_file[map_number][2][1])
+  else if(dif>ranking_file[map_number][2][12] || dif<ranking_file[map_number][1][12])
   {
-      ranking_file[map_number][3][1]=dif;
-      ranking_file[map_number][3][2]='\n';
+    for(int i=0;i<name_length;i++)
+    {
+      ranking_file[map_number][2][i]=name[i];
+    }
+    if(name_length<10)
+    {
+      int space = 10-name_length;
+      for(;space>0;space--)
+      {
+        ranking_file[map_number][0][name_length]=' ';
+        name_length++;
+      }
+    }
+    ranking_file[map_number][2][12]=dif;
   }
+  for(int k=0;k<map_max_number;k++)
+  {
+    for(int j=0;j<3;j++)
+    {
+      for(int i=0;i<10;i++)
+      {
+        fprintf(ranking_load, "%c", ranking_file[k][j][i]);
+      }
+      fprintf(ranking_load, "%c", ranking_file[k][j][11]);
+      fprintf(ranking_load, "%d", ranking_file[k][j][12]);
+      fprintf(ranking_load, "%c", ranking_file[k][j][13]);
+    }
+  }
+  fclose(ranking_load);
 }
