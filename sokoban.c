@@ -6,10 +6,10 @@
 #include <time.h>
 
 #define name_max_length 10  //이름의 최대 길이
-#define map_height  11
+#define map_height  13
 #define map_width 24  //맵의 최대 가로 길이
-#define max_hole 8
-#define map_max_number 3// 맵의 최대 개수
+#define max_hole 21
+#define map_max_number 5// 맵의 최대 개수
 
 int map_number=0, hole_number=0;
 int scan_name(char name[name_max_length]);   //이름을 적기 위한 함수, 리턴값은 이름의 길이
@@ -41,15 +41,17 @@ int undo_print(char map_file[map_height][map_width]);
       char map_replay[map_height][map_width];  //맵 리플레이를 저장하기 위한 변수
 
 void save_file_load(char map_file[map_height][map_width]);
-void save_file_save(char map_file[map_height][map_width], int);
+void save_file_save(char map_file[map_height][map_width], int, char name[name_max_length], int, int);
 void check_map(char map_file_all[map_max_number][map_height][map_width]);
 
-void save_ranking(int ranking_file[map_max_number][3][16], int, char name[name_max_length], int, int);
+void save_ranking(int ranking_file[map_max_number][4][13], int, char name[name_max_length], int);
 
+char name[name_max_length]; //이름을 입력받는 함수
+
+int dif_save=-1;
 int main(void)
 {
       FILE * map_load, *ranking_load;  //맵 파일 불러오기 위한 파일 변수
-      char name[name_max_length]; //이름을 입력받는 함수
       char insert;  //입력을 입력받는 변수
       int name_length, help_state=0;
       int hole_location[max_hole][2]={0};
@@ -59,7 +61,7 @@ int main(void)
       time_t start, end;
       int dif;
       int result;
-      int ranking_file[map_max_number][3][16];
+      int ranking_file[map_max_number][4][13];
 
       ranking_load = fopen("ranking.txt", "r");
       map_load = fopen("map.txt", "r");
@@ -79,28 +81,37 @@ int main(void)
 
       for(int k=0;k<map_max_number;k++)
       {
-        for(int j=0;j<3;j++)
+        for(int j=0;j<4;j++)
         {
           for(int i=0;i<10;i++)
           {
             fscanf(ranking_load, "%c", &ranking_file[k][j][i]);
           }
-          fscanf(ranking_load, "%c", &ranking_file[k][j][11]);
-          fscanf(ranking_load, "%d", &ranking_file[k][j][12]);
-          fscanf(ranking_load, "%c", &ranking_file[k][j][13]);
+          fscanf(ranking_load, "%c", &ranking_file[k][j][10]);
+          if(j==0)
+            fscanf(ranking_load, "%c", &ranking_file[k][j][11]);
+          else
+            fscanf(ranking_load, "%d", &ranking_file[k][j][11]);
+          fscanf(ranking_load, "%c", &ranking_file[k][j][12]);
+        }
+      }
+      for(int k=0;k<map_max_number;k++)
+      {
+        for(int j=0;j<4;j++)
+        {
+          for(int i=0;i<10;i++)
+          {
+            printf("%c", ranking_file[k][j][i]);
+          }
+          printf("%c", ranking_file[k][j][10]);
+          if(j==0)
+            printf("%c", ranking_file[k][j][11]);
+          else
+            printf("%d", ranking_file[k][j][11]);
+          printf("%c", ranking_file[k][j][12]);
         }
       }
       fclose(ranking_load);
-      for(int k=0;k<map_max_number;k++)
-      {
-        for(int j=0;j<3;j++)
-        {
-          printf("%s", ranking_file[k][j]);
-          printf("%c", ranking_file[k][j][11]);
-          printf("%d", ranking_file[k][j][12]);
-          printf("%c", ranking_file[k][j][13]);
-        }
-      }
 
       for(int i=0;i<map_height;i++) //맵 파일을 map_file에 저장
       {
@@ -121,7 +132,7 @@ int main(void)
 
       find_hole(map_file, hole_location);
       time(&start);
-
+      print_map(map_file, name);
       while(1)  //값을 입력받는다(e를 누르기 전까지)
       {
         if (replay_i==0) {
@@ -188,7 +199,6 @@ int main(void)
           case 'd' :
             if(help_state==1)
             {
-              print_map(map_file, name);
               help_state--;
               break;
             }
@@ -232,6 +242,13 @@ int main(void)
                 map_file[i][j] = map_file_all[0][i][j];
               }
             }
+            for(int i=0;i<max_hole;i++)
+            {
+              for(int j=0;j<2;j++)
+              {
+                hole_location[i][j]=0;
+              }
+            }
             find_hole(map_file, hole_location);
             print_map(map_file, name);
             map_number=0;
@@ -242,18 +259,36 @@ int main(void)
             break;
 
           case 's' :
-            save_file_save(map_file, map_number);
+            time(&end);
+            dif_save=difftime(end, start);
+            save_file_save(map_file, map_number, name, name_length, dif_save);
             break;
 
           case 'f' :
+            time(&start);
             save_file_load(map_file);
+            printf("%d", map_number);
+            find_hole(map_file, hole_location);
             print_map(map_file, name);
             break;
+
+          case 'e' :
+            exit(-1);
         }
         if (check_clear(map_file, hole_location)==1||insert=='c')
         {
-          time(&end);
-          dif=difftime(end, start);
+          if(dif_save==-1)
+          {
+            time(&end);
+            dif=difftime(end, start);
+          }
+          else
+          {
+            time(&end);
+            dif=dif_save+difftime(end, start);
+          }
+
+          save_ranking(ranking_file, dif, name, name_length);
           if(map_number==map_max_number-1)
           {
             system("clear");
@@ -262,7 +297,6 @@ int main(void)
             printf(". . . .");
             exit(-1);
           }
-          save_ranking(ranking_file, dif, name, name_length, map_number);
           map_number++;
           for(int i=0;i<map_height;i++)
           {
@@ -343,16 +377,16 @@ int find_char_width(char map_file[][map_width])
   }
 }
 
-void move_down(char map_file[][map_width], int height, int width)
+void move_down(char map_file[map_height][map_width], int height, int width)
 {
-  if(map_file[height+1][width] == '0')
+  if(map_file[height+1][width] == 'O')
   {
     map_file[height+1][width] = map_file[height][width];
     map_file[height][width] = ' ';
   }
   else if(map_file[height+1][width] == '$' && map_file[height+2][width] == '$');
   else if(map_file[height+1][width] == '$' && map_file[height+2][width] == '#');
-  else if(map_file[height+2][width] == '0' && map_file[height+1][width] == '$')
+  else if(map_file[height+2][width] == 'O' && map_file[height+1][width] == '$')
   {
     char temp;
     map_file[height+2][width] = ' ';
@@ -383,14 +417,14 @@ void move_down(char map_file[][map_width], int height, int width)
 void move_top(char map_file[][map_width], int height, int width)
 {
   char temp;
-  if(map_file[height-1][width] == '0')
+  if(map_file[height-1][width] == 'O')
   {
     map_file[height-1][width] = map_file[height][width];
     map_file[height][width] = ' ';
   }
   else if(map_file[height-1][width] == '$' && map_file[height-2][width] == '$');
   else if(map_file[height-1][width] == '$' && map_file[height-2][width] == '#');
-  else if(map_file[height-2][width] == '0' && map_file[height-1][width] == '$')
+  else if(map_file[height-2][width] == 'O' && map_file[height-1][width] == '$')
   {
     char temp;
     map_file[height-2][width] = ' ';
@@ -420,14 +454,14 @@ void move_top(char map_file[][map_width], int height, int width)
 
 void move_right(char map_file[][map_width], int height, int width)
 {
-  if(map_file[height][width+1] == '0')
+  if(map_file[height][width+1] == 'O')
   {
     map_file[height][width+1] = map_file[height][width];
     map_file[height][width] = ' ';
   }
   else if(map_file[height][width+1] == '$' && map_file[height][width+2] == '$');
   else if(map_file[height][width+1] == '$' && map_file[height][width+2] == '#');
-  else if(map_file[height][width+2] == '0' && map_file[height][width+1] == '$')
+  else if(map_file[height][width+2] == 'O' && map_file[height][width+1] == '$')
   {
     char temp;
     map_file[height][width+2] = ' ';
@@ -457,14 +491,14 @@ void move_right(char map_file[][map_width], int height, int width)
 
 void move_left(char map_file[][map_width], int height, int width)
 {
-  if(map_file[height][width-1] == '0')
+  if(map_file[height][width-1] == 'O')
   {
     map_file[height][width-1] = map_file[height][width];
     map_file[height][width] = ' ';
   }
   else if(map_file[height][width-1] == '$' && map_file[height][width-2] == '$');
   else if(map_file[height][width-1] == '$' && map_file[height][width-2] == '#');
-  else if(map_file[height][width-2] == '0' && map_file[height][width-1] == '$')
+  else if(map_file[height][width-2] == 'O' && map_file[height][width-1] == '$')
   {
     char temp;
     map_file[height][width-2] = ' ';
@@ -510,7 +544,7 @@ void find_hole(char map_file[map_height][map_width], int hole_location[max_hole]
   {
     for(int j=0;j<map_width;j++)
     {
-      if(map_file[i][j]=='0')
+      if(map_file[i][j]=='O')
       {
         hole_location[location_height][0] = i;
         hole_location[location_height][1] = j;
@@ -527,7 +561,7 @@ void change_hole(char map_file[map_height][map_width], int hole_location[max_hol
   {
     if(map_file[hole_location[i][0]][hole_location[i][1]]==' ')
     {
-      map_file[hole_location[i][0]][hole_location[i][1]]='0';
+      map_file[hole_location[i][0]][hole_location[i][1]]='O';
     }
   }
 }
@@ -614,7 +648,7 @@ return 0;
 
 }
 
-void save_file_save(char map_file[map_height][map_width], int map_number)
+void save_file_save(char map_file[map_height][map_width], int map_number, char name[name_max_length], int name_length, int dif)
 {
   FILE *save_file;
   save_file=fopen("sokoban.txt", "w");
@@ -626,6 +660,13 @@ void save_file_save(char map_file[map_height][map_width], int map_number)
     }
   }
   fprintf(save_file, "%d", map_number);
+  fprintf(save_file, " ");
+  for(int i=0;name_length>i;i++)
+  {
+      fprintf(save_file, "%c", name[i]);
+  }
+  fprintf(save_file, " ");
+  fprintf(save_file, "%d", dif);
   fclose(save_file);
 }
 
@@ -633,6 +674,7 @@ void save_file_load(char map_file[map_height][map_width])
 {
   FILE *save_file;
   save_file=fopen("sokoban.txt", "r");
+  char space;
   for(int i=0;i<map_height;i++)
   {
     for(int j=0;j<map_width;j++)
@@ -640,8 +682,12 @@ void save_file_load(char map_file[map_height][map_width])
         fscanf(save_file, "%c", &map_file[i][j]);
     }
   }
-  extern int map_number;
-  fscanf(save_file,"c", &map_number);
+  extern int map_number, dif_save;
+  fscanf(save_file,"%d", &map_number);
+  fscanf(save_file, "%c", &space);
+  fscanf(save_file, "%s", name);
+  fscanf(save_file, "%c", &space);
+  fscanf(save_file, "%d", &dif_save);
   fclose(save_file);
 }
 
@@ -654,7 +700,7 @@ void check_map(char map_file_all[map_max_number][map_height][map_width])
     {
       for(int j=0;j<map_width;j++)
       {
-          if(map_file_all[k][i][j]=='0')
+          if(map_file_all[k][i][j]=='O')
             hole_num_file++;
           else if(map_file_all[k][i][j]=='$')
             box_num_file++;
@@ -669,29 +715,56 @@ void check_map(char map_file_all[map_max_number][map_height][map_width])
   }
 }
 
-void save_ranking(int ranking_file[map_max_number][3][16], int dif, char name[name_max_length], int name_length, int map_number)
+void save_ranking(int ranking_file[map_max_number][4][13], int dif, char name[name_max_length], int name_length)
 {
   FILE *ranking_load;
+  int temp[14];
   ranking_load = fopen("ranking.txt", "w");
-  if(dif<ranking_file[map_number][2][12] || dif>ranking_file[map_number][1][12])
+  if(dif>ranking_file[map_number][3][11] || dif<=ranking_file[map_number][2][11])
   {
+    for(int i=0;i<14;i++)
+    {
+      temp[i]=ranking_file[map_number][2][i];
+      ranking_file[map_number][2][i]=ranking_file[map_number][3][i];
+      ranking_file[map_number][1][i]=temp[i];
+    }
+    for(int i=0;i<name_max_length;i++)
+    {
+      ranking_file[map_number][3][i]=' ';
+    }
+    for(int i=0;i<name_length;i++)
+    {
+      ranking_file[map_number][3][i]=name[i];
+    }
+    ranking_file[map_number][3][11]=dif;
+  }
+  else if(dif>ranking_file[map_number][2][11] || dif<=ranking_file[map_number][1][11])
+  {
+    for(int i=0;i<14;i++)
+    {
+      ranking_file[map_number][3][i]=ranking_file[map_number][2][i];
+    }
+    for(int i=0;i<name_max_length;i++)
+    {
+      ranking_file[map_number][2][i]=' ';
+    }
     for(int i=0;i<name_length;i++)
     {
       ranking_file[map_number][2][i]=name[i];
     }
-    if(name_length<10)
-    {
-      int space = 10-name_length;
-      for(;space>0;space--)
-      {
-        ranking_file[map_number][0][name_length]=' ';
-        name_length++;
-      }
-    }
-    ranking_file[map_number][2][12]=dif;
+    ranking_file[map_number][2][11]=dif;
   }
-  else if(dif<ranking_file[map_number][1][12] || dif>ranking_file[map_number][0][12])
+  else if(dif>ranking_file[map_number][1][11])
   {
+    for(int i=0;i<14;i++)
+    {
+      ranking_file[map_number][3][i]=ranking_file[map_number][2][i];
+      ranking_file[map_number][2][i]=ranking_file[map_number][1][i];
+    }
+    for(int i=0;i<name_max_length;i++)
+    {
+      ranking_file[map_number][1][i]=' ';
+    }
     for(int i=0;i<name_length;i++)
     {
       ranking_file[map_number][1][i]=name[i];
@@ -701,40 +774,26 @@ void save_ranking(int ranking_file[map_max_number][3][16], int dif, char name[na
       int space = 10-name_length;
       for(;space>0;space--)
       {
-        ranking_file[map_number][0][name_length]=' ';
+        ranking_file[map_number][1][name_length]=32;
         name_length++;
       }
     }
-    ranking_file[map_number][1][12]=dif;
-  }
-  else if(dif<ranking_file[map_number][0][12])
-  {
-    for(int i=0;i<name_length;i++)
-    {
-      ranking_file[map_number][0][i]=name[i];
-    }
-    if(name_length<10)
-    {
-      int space = 10-name_length;
-      for(;space>0;space--)
-      {
-        ranking_file[map_number][0][name_length]=32;
-        name_length++;
-      }
-    }
-    ranking_file[map_number][0][12]=dif;
+    ranking_file[map_number][1][11]=dif;
   }
   for(int k=0;k<map_max_number;k++)
   {
-    for(int j=0;j<3;j++)
+    for(int j=0;j<4;j++)
     {
       for(int i=0;i<10;i++)
       {
         fprintf(ranking_load, "%c", ranking_file[k][j][i]);
       }
-      fprintf(ranking_load, "%c", ranking_file[k][j][11]);
-      fprintf(ranking_load, "%d", ranking_file[k][j][12]);
-      fprintf(ranking_load, "%c", ranking_file[k][j][13]);
+      fprintf(ranking_load, "%c", ranking_file[k][j][10]);
+      if(j==0)
+        fprintf(ranking_load, "%c", ranking_file[k][j][11]);
+      else
+        fprintf(ranking_load, "%d", ranking_file[k][j][11]);
+      fprintf(ranking_load, "%c", ranking_file[k][j][12]);
     }
   }
   fclose(ranking_load);
