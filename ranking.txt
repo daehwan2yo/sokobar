@@ -1,20 +1,20 @@
 map1        
-default    0
-default    0
-default    0
+default    100
+default    100
+default    100
 map2        
-default    0
-default    0
-default    0
+default    100
+default    100
+default    100
 map3        
-default    0
-default    0
-default    0
+default    100
+default    100
+default    100
 map4        
-default    0
-default    0
-default    0
+default    100
+default    100
+default    100
 map5        
-default    0
-default    0
-default    0
+default    100
+default    100
+default    100
