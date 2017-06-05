@@ -57,6 +57,9 @@ void save_ranking(int ranking_file[map_max_number][4][13], int, char [name_max_l
 void display_top(int ranking_file[map_max_number][4][13]); //랭킹을 보여주는 함수
 void display_top_number(int ranking_file[map_max_number][4][13], char insert);  //각 맵별로 랭킹을 보여주는 함수
 
+//종료 관련 함수
+void end_all(char name[name_length]);
+
 int main(void)
 {
       //이름 관련 변수
@@ -273,7 +276,7 @@ int main(void)
             break;
 
           case 'e' :
-            exit(-1);
+            end_all(name);
 
         }
         if (check_clear(map_file, hole_location)==1||insert=='c')
@@ -292,13 +295,7 @@ int main(void)
 
           save_ranking(ranking_file, dif, name, name_length);
           if(map_number==map_max_number-1)
-          {
-            system("clear");
-            printf("\n   SEE YOU ");
-            printf("%s", name);
-            printf(". . . .");
-            exit(-1);
-          }
+            end_all(name);
           map_number++;
           for(int i=0;i<map_height;i++)
           {
@@ -845,4 +842,13 @@ void save_ranking(int ranking_file[map_max_number][4][13], int dif, char name[na
     }
   }
   fclose(ranking_load);
+}
+
+void end_all(char name[name_length])
+{
+  system("clear");
+  printf("\n   SEE YOU ");
+  printf("%s", name);
+  printf(". . . .");
+  exit(-1);
 }
