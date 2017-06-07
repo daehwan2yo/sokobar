@@ -211,6 +211,14 @@ int main(void)
               break;
 
           case 'r' :
+            for (int i=0; i<map_height; i++)    //undo배열 5개를 맵의 초기상태로 초기화함.
+                for(int j=0; j<map_width; j++) {
+                  undo[0][i][j]= map_file[i][j];
+                  undo[1][i][j]= map_file[i][j];
+                  undo[2][i][j]= map_file[i][j];
+                  undo[3][i][j]= map_file[i][j];
+                  undo[4][i][j]= map_file[i][j];
+                }
               //초기 맵화면을 불러와 출력함
              for(int i=0; i<map_height; i++){
                for(int j=0; j<map_width; j++){
