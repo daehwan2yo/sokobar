@@ -320,7 +320,7 @@ int main(void)
         }
 
         //클리어 조건을 확인함.
-        if (check_clear(map_file, hole_location)==1||insert=='c')
+        if (check_clear(map_file, hole_location)==1)
         {
           if(dif_save==-1)  //만약 맵파일을 로드하지 않았을 시
           {
