@@ -1,20 +1,20 @@
-map1        
-default    100
-default    100
-default    100
-map2        
-default    100
-default    100
-default    100
-map3        
-default    100
-default    100
-default    100
-map4        
-default    100
-default    100
-default    100
-map5        
-default    100
-default    100
-default    100
+map1           
+default    100sec
+default    100sec
+default    100sec
+map2           
+default    100sec
+default    100sec
+default    100sec
+map3           
+default    100sec
+default    100sec
+default    100sec
+map4           
+default    100sec
+default    100sec
+default    100sec
+map5           
+default    100sec
+default    100sec
+default    100sec
