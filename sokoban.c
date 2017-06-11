@@ -222,6 +222,15 @@ int main(void)
                  map_file[i][j] = map_replay[i][j];
                    }
                  }
+                 // 보관장소의 좌표를 초기화
+                 for(int i=0;i<max_hole;i++)
+                 {
+                   for(int j=0;j<2;j++)
+                   {
+                     hole_location[i][j]=0;
+                   }
+                 }
+                 find_hole(map_file, hole_location); //세이브 파일에서 불러온 맵의 보관장소의 좌표를 저장
                for (int i=0; i<map_height; i++)    //undo배열 5개를 맵의 초기상태로 초기화함.
                   for(int j=0; j<map_width; j++) {
                     undo[0][i][j]= map_file[i][j];
