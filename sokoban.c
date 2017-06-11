@@ -5,10 +5,15 @@
 #include <math.h>
 #include <time.h>
 
+//맵 관련 상수
 #define map_max_number 5// 맵의 최대 개수
 #define map_width 25  //맵의 최대 가로길이
 #define map_height 15  //맵의 최대 세로길이
-#define name_max_length 11  //이름의 최대 길이
+
+//이름 관련 상수
+#define name_max_length 10  //이름의 최대 길이
+
+//보관장소 관련 상수
 #define max_hole 21  //맵의 최대 홀의 개수 + 1
 
 //입력 관련
