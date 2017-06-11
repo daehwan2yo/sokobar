@@ -5,11 +5,16 @@
 #include <math.h>
 #include <time.h>
 
-#define name_max_length 10  //이름의 최대 길이
-#define max_hole 21  //맵의 최대 홀의 개수 + 1
+//맵 관련 상수
 #define map_max_number 5// 맵의 최대 개수
 #define map_width 25
 #define map_height 15
+
+//이름 관련 상수
+#define name_max_length 10  //이름의 최대 길이
+
+//보관장소 관련 상수
+#define max_hole 21  //맵의 최대 홀의 개수 + 1
 
 //입력 관련 함수
 int getch(void); //엔터 없이 입력하게 하기 위한 함수
@@ -152,7 +157,7 @@ int main(void)
         if (replay_i==0) {
         for(int i=0; i<map_height; i++){
           for(int j=0; j<map_width; j++){
-            map_replay[i][j] = map_file[i][j];  //초기 맵파일을 맵리플레이 배열에 저장
+            map_replay[i][j] = map_file_all[map_number][i][j];  //초기 맵파일을 맵리플레이 배열에 저장
             undo[0][i][j]= map_file[i][j];      //다음 단계로 넘어가면 undo배열을 초기화시켜줌
             undo[1][i][j]= map_file[i][j];
             undo[2][i][j]= map_file[i][j];
@@ -308,21 +313,11 @@ int main(void)
               }
             }
             find_hole(map_file, hole_location); //세이브 파일에서 불러온 맵의 보관장소의 좌표를 저장
-            for (int i=0; i<map_height; i++)    //undo배열 5개를 맵의 초기상태로 초기화함.
-                for(int j=0; j<map_width; j++) {
-                  undo[0][i][j]= map_file[i][j];
-                  undo[1][i][j]= map_file[i][j];
-                  undo[2][i][j]= map_file[i][j];
-                  undo[3][i][j]= map_file[i][j];
-                  undo[4][i][j]= map_file[i][j];
-                }
-                for(int i=0; i<map_height; i++){
-                  for(int j=0; j<map_width; j++){
-                    map_replay[i][j] = map_file[i][j];  //초기 맵파일을 맵리플레이 배열에 저장
-                      }
-                    }
+
+            replay_i=0;
             time(&start);  //시간을 여기부터 시작함
             print_map(map_file, name);  //맵을 출력
+
             break;
 
           case 'e' :
