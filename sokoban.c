@@ -257,6 +257,17 @@ int main(void)
               }
             }
             find_hole(map_file, hole_location);  //보관장소 찾기
+
+            //undo배열 5개를 맵의 초기상태로 초기화함.
+            for (int i=0; i<map_height; i++)
+                for(int j=0; j<map_width; j++) {
+                  undo[0][i][j]= map_file[i][j];
+                  undo[1][i][j]= map_file[i][j];
+                  undo[2][i][j]= map_file[i][j];
+                  undo[3][i][j]= map_file[i][j];
+                  undo[4][i][j]= map_file[i][j];
+                }
+
             time(&start);  //시작시간을 이때로 변경함
             print_map(map_file, name); //맵 출력
             map_number=0;  //현재 맵의 순서를 첫번째로 변경
