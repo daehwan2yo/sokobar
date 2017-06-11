@@ -5,35 +5,31 @@
 #include <math.h>
 #include <time.h>
 
-//맵 관련 상수
-#define map_max_number 5// 맵의 최대 개수
-#define map_width 25  //맵의 최대 가로길이
-#define map_height 15  //맵의 최대 세로길이
-
-//이름 관련 상수
+//이름관련 상수
 #define name_max_length 10  //이름의 최대 길이
 
 //보관장소 관련 상수
 #define max_hole 21  //맵의 최대 홀의 개수 + 1
 
-//입력 관련
+//맵 관련 상수
+#define map_max_number 5// 맵의 최대 개수
+#define map_width 25  //맵의 최대 가로길이
+#define map_height 15  //맵의 최대 세로길이
+
+//입력 관련 함수
 int getch(void); //엔터 없이 입력하게 하기 위한 함수
 
-//이름 관련
+//이름 관련 함수
 int scan_name(char name[name_max_length]);   //이름을 적기 위한 함수, 리턴값은 이름의 길이
 int name_length;  //이름의 길이를 저장하는 변수
 
-//보관장소 관련
-void change_hole(char map_file[map_height][map_width], int hole_location[max_hole][2]); //맵의 보관장소가 아무것도 없으면 채우는 함수
-void find_hole(char map_file[map_height][map_width], int hole_location[max_hole][2]);  //맵의 보관장소의 좌표를 찾는 함수
-
-//맵 관련
+//맵 관련 함수
 int map_number=0, hole_number=0;  //현재 맵의 숫자, 전체 맵의 홀의 개수
 void print_map(char map_file[map_height][map_width], char name[name_max_length]);//맵을 출력하는 함수
 int check_clear(char map_file[map_height][map_width], int hole_location[max_hole][2]);  //현재 맵을 클리어 했는지 확인하는 함수
 void check_map(char map_file_all[map_max_number][map_height][map_width]);  //맵에서 박스와 보관장소가 일치하는지 확인
 
-//캐릭터 관련
+//캐릭터 관련 함수
 int find_char_height(char map_file[map_height][map_width]);  //캐릭터의 위치의 좌표를 찾는 함수
 int find_char_width(char map_file[map_height][map_width]);
 void move_down(char map_file[map_height][map_width], int, int);  // 캐릭터를 움직이게 하는 함수
@@ -41,28 +37,32 @@ void move_top(char map_file[map_height][map_width], int, int);
 void move_left(char map_file[map_height][map_width], int, int);
 void move_right(char map_file[map_height][map_width], int, int);
 
-//도움말 관련
+//보관장소 관련 함수
+void change_hole(char map_file[map_height][map_width], int hole_location[max_hole][2]); //맵의 보관장소가 아무것도 없으면 채우는 함수
+void find_hole(char map_file[map_height][map_width], int hole_location[max_hole][2]);  //맵의 보관장소의 좌표를 찾는 함수
+
+//도움말 관련 함수
 void display_help(void);  //도움말을 출력하는 함수
 
-//undo관련
+//undo관련 함수
 void undo_scan(char map_file[map_height][map_width]);   //움직일 때 마다 움직임을 저장하는 함수
 int undo_print(char map_file[map_height][map_width]);   //이전 움직임을 불러오는 함수
 char undo[5][map_height][map_width]={0};                //움직임을 저장할 5개의 배열
 
-//replay관련
+//replay관련 함수
 char map_replay[map_height][map_width];  //맵 리플레이를 저장하기 위한 변수
 
-//save관련
+//save관련 함수
 int dif_save=-1; //LOAD를 했는지 안했는지 알려주는 변수
-void save_file_load(char map_file[map_height][map_width], char name[name_max_length]);  //파일을 세이브 하는 함수
-void save_file_save(char map_file[map_height][map_width], int, char name[name_max_length], int, int);  //세이브를 불러오는 함수
+void save_file_load(char map_file[map_height][map_width], char name[name_max_length]);  //파일을 로드 하는 함수
+void save_file_save(char map_file[map_height][map_width], int, char name[name_max_length], int, int);  //파일을 세이브 하는 함수
 
-//ranking관련
+//ranking관련 함수
 void save_ranking(int ranking_file[map_max_number][4][17], int, char [name_max_length], int);  //랭킹을 세이브 하는 함수
 void display_top(int ranking_file[map_max_number][4][17]); //랭킹을 보여주는 함수
 void display_top_number(int ranking_file[map_max_number][4][17], char insert);  //각 맵별로 랭킹을 보여주는 함수
 
-//종료 관련
+//종료 관련 함수
 void end_all(char name[name_length]);
 
 int main(void)
@@ -137,7 +137,7 @@ int main(void)
             fscanf(ranking_load, "%c", &ranking_file[k][j][11]);
           else
             fscanf(ranking_load, "%d", &ranking_file[k][j][11]);
-          for(int i=0;i<5;i++)
+          for(int i=0; i<5; i++)
           {
             fscanf(ranking_load, "%c", &ranking_file[k][j][12+i]);
           }
@@ -235,39 +235,39 @@ int main(void)
 
           case 'n' :
             //맵파일 초기화
-            for(int j=0;j<map_height;j++)
+            for(int i=0;i<map_height;i++)
             {
-              for(int i=0;i<map_width;i++)
+              for(int j=0;j<map_width;j++)
               {
-                map_file[j][i]=0;
+                map_file[i][j] = 0;
               }
             }
             //첫번째 맵 파일을 map_file에 저장
             q=0;
-            for(int j=1;map_file_all[0][j][0] != 'm' && map_file_all[0][j][0] != 'e';j++)
+            for(int j=1;map_file_all[0][j][0] != 'm' && map_file_all[0][j][0] != 'e' ; j++)
             {
-              for(int i=0;map_file_all[0][j][i] != 0 ;i++)
+              for(int i=0;map_file_all[0][j][i] != 0; i++)
               {
-                  map_file[q][i] = map_file_all[0][j][i];
+                map_file[q][i] = map_file_all[0][j][i];
               }
                 q++;
             }
 
             //보관장소의 좌표를 다시 찾기 위해 배열 초기화
-            for(int i=0;i<max_hole;i++)
+            for(int i=0; i<max_hole; i++)
             {
-              for(int j=0;j<2;j++)
+              for(int j=0; j<2; j++)
               {
                 hole_location[i][j]=0;
               }
             }
             find_hole(map_file, hole_location);  //보관장소 찾기
 
-            //undo배열 5개를 맵의 초기상태로 초기화함.
-            for (int i=0; i<map_height; i++)
-                for(int j=0; j<map_width; j++) {
-                  undo[0][i][j]= map_file[i][j];
-                  undo[1][i][j]= map_file[i][j];
+
+            for (int i=0; i<map_height; i++)    //undo배열 5개를 맵의 초기상태로 초기화함.
+               for(int j=0; j<map_width; j++) {
+                 undo[0][i][j]= map_file[i][j];
+                 undo[1][i][j]= map_file[i][j];
                   undo[2][i][j]= map_file[i][j];
                   undo[3][i][j]= map_file[i][j];
                   undo[4][i][j]= map_file[i][j];
@@ -637,15 +637,13 @@ void move_left(char map_file[map_height][map_width], int height, int width)
 int scan_name(char name[name_max_length])
 {
 	int name_size;  //이름 길이
-  int i=0;  //입력받을 때의 이름의 길이
-  char c;  //입력받을때의 한글자 저장을 위한 변수
 	printf("Start.....\n");
 	printf("Input name : ");
 	scanf("%s", name);  //이름을 입력받음
   //이름의 크기가 10이하로 입력받게 함
   while(1)
   {
-    if(strlen(name)<=10)  //이름의 크기가 10이상일 때 while문을 빠져나감
+    if(strlen(name)<=10)  //이름의 크기가 10이하일 때 while문을 빠져나감
     {
       break;
     }
@@ -723,10 +721,10 @@ void display_top(int ranking_file[map_max_number][4][17])
         printf("%c", ranking_file[k][j][11]);
       else
         printf("%d", ranking_file[k][j][11]);
-      for(int i=0;i<5;i++)
-      {
-        printf("%c", ranking_file[k][j][12+i]);
-      }
+        for(int i=0; i<5; i++)
+        {
+          printf("%c", ranking_file[k][j][12+i]);
+        }
     }
   }
   printf("\n*****맵 별 랭킹을 보려면 1~5(맵 번호)를 입력*****");
@@ -772,7 +770,7 @@ void display_top_number(int ranking_file[map_max_number][4][17], char insert)
       printf("%c", ranking_file[k][j][11]);
     else
       printf("%d", ranking_file[k][j][11]);
-    for(int i=0;i<5;i++)
+    for(int i=0; i<5; i++)
     {
       printf("%c", ranking_file[k][j][12+i]);
     }
@@ -819,7 +817,7 @@ for(int j=0; j<map_width; j++){
 //undo를 눌렀을 때 출력하는 함수
 int undo_print(char map_file[][map_width])
 {
-int undo_num =0; //최대 5번 을 하기위한 변수
+static int undo_num =0; //최대 5번 을 하기위한 변수
 
  if (undo_num==5)   //5번을 하면 아무런 반응이 없음
     return 0;
@@ -991,10 +989,10 @@ void save_ranking(int ranking_file[map_max_number][4][17], int dif, char name[na
         fprintf(ranking_load, "%c", ranking_file[k][j][11]);
       else
         fprintf(ranking_load, "%d", ranking_file[k][j][11]);
-      for(int i=0;i<5;i++)
-      {
-        fprintf(ranking_load, "%c", ranking_file[k][j][12+i]);
-      }
+        for(int i=0; i<5; i++)
+        {
+          fprintf(ranking_load, "%c", ranking_file[k][j][12+i]);
+        }
     }
   }
   fclose(ranking_load);
