@@ -5,11 +5,16 @@
 #include <math.h>
 #include <time.h>
 
-#define name_max_length 10  //이름의 최대 길이
-#define max_hole 21  //맵의 최대 홀의 개수 + 1
+//맵 관련 상수
 #define map_max_number 5// 맵의 최대 개수
 #define map_width 25
 #define map_height 15
+
+//이름 관련 상수
+#define name_max_length 10  //이름의 최대 길이
+
+//보관장소 관련 상수
+#define max_hole 21  //맵의 최대 홀의 개수 + 1
 
 //입력 관련 함수
 int getch(void); //엔터 없이 입력하게 하기 위한 함수
